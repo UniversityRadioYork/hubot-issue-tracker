@@ -39,30 +39,36 @@ module.exports = (robot) ->
 		Utils.addTask msg.message.user, msg.match[1]
 		.then (data) ->
 			msg.reply data
-		.catch () ->
-			msg.reply error_message
+		.catch (err) ->
+			robot.emit 'error', err, msg
 		.done()
 
 	robot.respond /list tasks/, (msg) ->
 		Utils.listTasks()
 		.then (data) ->
 			msg.reply data
-		.catch () ->
-			msg.reply error_message
+		.catch (err) ->
+			robot.emit 'error', err, msg
 		.done()
 
 	robot.respond /task (\d*) details/, (msg) ->
 		Utils.taskDetails msg.match[1]
 		.then (data) ->
 			msg.reply data
-		.catch () ->
-			msg.reply error_message
+		.catch (err) ->
+			robot.emit 'error', err, msg
 		.done()
 
 	robot.respond /close task (\d*)/, (msg) ->
 		Utils.closeTask msg.message.user, msg.match[1]
 		.then (data) ->
 			msg.reply data
-		.catch () ->
-			msg.reply error_message
+		.catch (err) ->
+			robot.emit 'error', err, msg
 		.done()
+
+	robot.error (err, res) ->
+		robot.logger.error err
+
+		if res?
+			res.reply error_message
