@@ -88,7 +88,10 @@ module.exports = class Utils
 							if data["body"]?
 								try
 									info = toml.parse data["body"]
-									string += "\nReported By: #{info["user"]["name"]}"
+									if info["user"]["real_name"]?
+										string += "\nReported By: #{info["user"]["real_name"]} (#{info["user"]["name"]})"
+									else
+										string += "\nReported By: #{info["user"]["name"]}"
 								catch error
 #									do nothing, break nothing
 							string += """
