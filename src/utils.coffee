@@ -16,6 +16,8 @@ module.exports = class Utils
 	@addTask: (user, task) ->
 		deferred = q.defer()
 		try
+			if user["slack"]?
+				delete  user["slack"]
 			request.post
 				"url": base_url
 				"headers": headers
@@ -167,6 +169,8 @@ module.exports = class Utils
 	@addCommentToIssue: (user, id) ->
 		deferred = q.defer()
 		try
+			if user["slack"]?
+				delete  user["slack"]
 			request.post
 				"url": "#{base_url}/#{encodeURIComponent id}/comments"
 				"headers": headers
