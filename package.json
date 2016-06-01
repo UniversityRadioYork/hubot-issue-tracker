@@ -1,0 +1,28 @@
+{
+  "name": "hubot-issue-tracker",
+  "private": true,
+  "description": "A hubot script that helps to keep track of issues reported in Slack",
+  "version": "0.1.0",
+  "author": "Chris Taylor <christhebaron@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+	"hubot",
+	"hubot-scripts",
+	"issue",
+	"github"
+  ],
+  "repository": {
+	"type": "git",
+	"url": "git://github.com/UniversityRadioYork/hubot-issue-tracker.git"
+  },
+  "bugs": {
+	"url": "https://github.com/UniversityRadioYork/hubot-issue-tracker/issues"
+  },
+  "dependencies": {
+	"coffee-script": "^1.10",
+	"q": "^1.4.1",
+	"toml": "^2.3.0",
+	"tomlify-j0.4": "^1.0.1"
+  },
+  "main": "index.coffee"
+}
