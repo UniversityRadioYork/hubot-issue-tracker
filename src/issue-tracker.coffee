@@ -36,7 +36,7 @@ error_message = "Oops, I couldn't do that. Please contact #{process.env.HUBOT_IS
 
 module.exports = (robot) ->
 	robot.respond /add task (.*)/, (msg) ->
-		Utils.addTask msg.message.user, msg.match[1]
+		Utils.addTask(msg.message.user, msg.match[1])
 		.then (data) ->
 			msg.reply data
 		.catch (err) ->
@@ -52,7 +52,7 @@ module.exports = (robot) ->
 		.done()
 
 	robot.respond /task (\d*) details/, (msg) ->
-		Utils.taskDetails msg.match[1]
+		Utils.taskDetails(msg.match[1])
 		.then (data) ->
 			msg.reply data
 		.catch (err) ->
@@ -60,7 +60,7 @@ module.exports = (robot) ->
 		.done()
 
 	robot.respond /close task (\d*)/, (msg) ->
-		Utils.closeTask msg.message.user, msg.match[1]
+		Utils.closeTask(msg.message.user, msg.match[1])
 		.then (data) ->
 			msg.reply data
 		.catch (err) ->
