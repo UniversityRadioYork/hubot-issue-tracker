@@ -1,21 +1,21 @@
 # Description
-#   A hubot script that helps to keep track of issues reported in Slack.
+#  A hubot script that helps to keep track of issues reported in Slack.
 #
 # Configuration:
-#   HUBOT_ISSUE_TRACKER_GITHUB_TOKEN - Access token for the Github user
-#		HUBOT_ISSUE_TRACKER_GITHUB_OWNER - Owner of the repo to add issues to
-#		HUBOT_ISSUE_TRACKER_GITHUB_REPO - Repo to add issues to
-#		HUBOT_ISSUE_TRACKER_GITHUB_LABEL - Label to add to the issue
-#		HUBOT_ISSUE_TRACKER_CONTACT - The contact to report issues to
+#  HUBOT_ISSUE_TRACKER_GITHUB_TOKEN - Access token for the Github user
+#  HUBOT_ISSUE_TRACKER_GITHUB_OWNER - Owner of the repo to add issues to
+#  HUBOT_ISSUE_TRACKER_GITHUB_REPO - Repo to add issues to
+#  HUBOT_ISSUE_TRACKER_GITHUB_LABEL - Label to add to the issue
+#  HUBOT_ISSUE_TRACKER_CONTACT - The contact to report issues to
 #
 # Commands:
-#   hubot add task <task> - Adds a task as an issue on Github with a specific label
-#   hubot list tasks - Lists all the open issues on Github with the label
-#   hubot task <id> details - Displays the details about an issue
-#   hubot close task <id> - Marks the issue as closed on Github
+#  hubot add task <task> - Adds a task as an issue on Github with a specific label
+#  hubot list tasks - Lists all the open issues on Github with the label
+#  hubot task <id> details - Displays the details about an issue
+#  hubot close task <id> - Marks the issue as closed on Github
 #
 # Author:
-#   ChrisTheBaron
+#  ChrisTheBaron
 
 Utils = require "./utils"
 
