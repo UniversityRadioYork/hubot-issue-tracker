@@ -72,45 +72,41 @@ module.exports = class Utils
 	@taskDetails: (id) ->
 		deferred = q.defer()
 		try
-			request.get
-				"url": "#{base_url}/#{encodeURIComponent id}"
-				"headers": headers
-			,
-				(error, response, body) ->
-					try
-						if not error and response.statusCode == 200
-							data = JSON.parse body
-							string = """
-								Task ##{id} details:
+			Utils.getTask(id)
+			.then (issue) ->
+				try
+					string = """
+					Task ##{id} details:
 
-								Description: #{data["title"]}
-								"""
-							if data["body"]?
-								try
-									info = toml.parse data["body"]
-									if info["user"]["real_name"]?
-										string += "\nReported By: #{info["user"]["real_name"]} (#{info["user"]["name"]})"
-									else
-										string += "\nReported By: #{info["user"]["name"]}"
-								catch error
-#									do nothing, break nothing
-							string += """
+					Description: #{issue["title"]}
+					"""
+					if issue["body"]?
+						try
+							info = toml.parse issue["body"]
+							if info["user"]["real_name"]?
+								string += "\nReported By: #{info["user"]["real_name"]} (#{info["user"]["name"]})"
+							else
+								string += "\nReported By: #{info["user"]["name"]}"
+						catch error
+#							do nothing, break nothing
+					string += """
 
-								Status: #{data["state"]}
-								Opened: #{data["created_at"]}
-								Last Updated: #{data["updated_at"]}
-								"""
-							if data["state"] is "closed"
-								string += """
+					Status: #{issue["state"]}
+					Opened: #{issue["created_at"]}
+					Last Updated: #{issue["updated_at"]}
+					"""
+					if issue["state"] is "closed"
+						string += """
 
-								Closed: #{data["closed_at"]}
-								Closed By: #{data["closed_by"]["login"]}
-								""" # @TODO: Check to see if it was us that closed it
-							deferred.resolve string
-						else
-						deferred.reject if error then error else body
-					catch ex
-						deferred.reject ex
+						Closed: #{issue["closed_at"]}
+						Closed By: #{issue["closed_by"]["login"]}
+						""" # @TODO: Check to see if it was us that closed it
+					deferred.resolve string
+				catch ex
+					deferred.reject ex
+			.catch (ex) ->
+				deferred.reject ex
+			.done()
 		catch ex
 			deferred.reject ex
 		return deferred.promise
@@ -147,24 +143,20 @@ module.exports = class Utils
 	@getStatusAndOwnerOfTask: (id) ->
 		deferred = q.defer()
 		try
-			request.get
-				"url": "#{base_url}/#{encodeURIComponent id}"
-				"headers": headers
-			,
-				(error, response, body) ->
-					try
-						if not error and response.statusCode == 200
-							data = JSON.parse body
-							owner = null
-							if data["body"]?
-								info = toml.parse data["body"]
-								if info["user"]? and info["user"]["name"]?
-									owner = info["user"]["name"]
-							deferred.resolve [data["state"], owner]
-						else
-						deferred.reject if error then error else body
-					catch ex
-						deferred.reject ex
+			Utils.getTask(id)
+			.then (task) ->
+				try
+					owner = null
+					if task["body"]?
+						info = toml.parse task["body"]
+						if info["user"]? and info["user"]["name"]?
+							owner = info["user"]["name"]
+					deferred.resolve [task["state"], owner]
+				catch ex
+					deferred.reject ex
+			.catch (ex) ->
+				deferred.reject ex
+			.done()
 		catch ex
 			deferred.reject ex
 		return deferred.promise
@@ -216,3 +208,34 @@ module.exports = class Utils
 		catch ex
 			deferred.reject ex
 		return deferred.promise
+
+	@getTask: (id) ->
+		deferred = q.defer()
+		try
+			request.get
+				"url": "#{base_url}/#{encodeURIComponent id}"
+				"headers": headers
+			,
+				(error, response, body) ->
+					try
+						if not error and response.statusCode == 200
+							task = JSON.parse body
+							if Utils.hasLabel task
+								deferred.resolve task
+							else
+								deferred.reject new Error "Task doesn't have correct label, we don't have permission to see it :)"
+						else
+						deferred.reject if error then error else body
+					catch ex
+						deferred.reject ex
+		catch ex
+			deferred.reject ex
+		return deferred.promise
+
+	@hasLabel: (task) ->
+		unless task["labels"]?
+			return false
+		for label in task["labels"]
+			if label["name"] is process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL
+				return true
+		return false
