@@ -2,7 +2,7 @@
   "name": "hubot-issue-tracker",
   "private": true,
   "description": "A hubot script that helps to keep track of issues reported in Slack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Chris Taylor <christhebaron@gmail.com>",
   "license": "MIT",
   "keywords": [
