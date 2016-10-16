@@ -2,6 +2,7 @@ request = require "request"
 q = require "q"
 tomlify = require "tomlify-j0.4"
 toml = require "toml"
+moment = require "moment"
 
 api_url = "https://api.github.com"
 base_url = "#{api_url}/repos/#{process.env.HUBOT_ISSUE_TRACKER_GITHUB_OWNER}/#{process.env.HUBOT_ISSUE_TRACKER_GITHUB_REPO}/issues"
@@ -48,19 +49,56 @@ module.exports = class Utils
 
 	@listTasks: ->
 		deferred = q.defer()
+		promises = q.all [
+			Utils.getOpenTasks()
+			Utils.getRecentlyClosedTasks()
+		]
+		promises.then (data) ->
+			string = "Current tasks:\n\n"
+			for issue in data[0]
+				string += " - ##{issue.number} - #{issue.title}\n"
+			string += "\nRecently Closed Tasks:\n\n"
+			for issue in data[1]
+				string += " - ##{issue.number} - #{issue.title}\n"
+			deferred.resolve string
+		.catch (ex) ->
+			deferred.reject ex
+		.done()
+		return deferred.promise
+
+	@getRecentlyClosedTasks: ->
+		deferred = q.defer()
 		try
+			stamp = moment().subtract(7, 'days').toISOString()
 			request.get
-				"url": "#{base_url}?state=open&labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL }"
+				"url": "#{base_url}?state=closed&since=#{encodeURIComponent stamp}labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL}"
 				"headers": headers
 			,
 				(error, response, body) ->
 					try
 						if not error and response.statusCode == 200
 							data = JSON.parse body
-							string = "Current tasks:\n\n"
-							for issue in data
-								string += " - ##{issue.number} - #{issue.title}\n"
-							deferred.resolve string
+							deferred.resolve data
+						else
+						deferred.reject if error then error else body
+					catch ex
+						deferred.reject ex
+		catch ex
+			deferred.reject ex
+		return deferred.promise
+
+	@getOpenTasks: ->
+		deferred = q.defer()
+		try
+			request.get
+				"url": "#{base_url}?state=open&labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL}"
+				"headers": headers
+			,
+				(error, response, body) ->
+					try
+						if not error and response.statusCode == 200
+							data = JSON.parse body
+							deferred.resolve data
 						else
 						deferred.reject if error then error else body
 					catch ex
