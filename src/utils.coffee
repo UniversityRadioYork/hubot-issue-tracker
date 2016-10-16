@@ -50,7 +50,7 @@ module.exports = class Utils
 		deferred = q.defer()
 		try
 			request.get
-				"url": "#{base_url}?state=open&sort=created&direction=asc&labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL }"
+				"url": "#{base_url}?state=open&labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL }"
 				"headers": headers
 			,
 				(error, response, body) ->
@@ -84,21 +84,19 @@ module.exports = class Utils
 						try
 							info = toml.parse issue["body"]
 							if info["user"]["real_name"]?
-								string += "\nReported By: #{info["user"]["real_name"]} (#{info["user"]["name"]})"
+								string += "\nReported By: #{info["user"]["real_name"]} (#{info["user"]["name"]})\n"
 							else
-								string += "\nReported By: #{info["user"]["name"]}"
+								string += "\nReported By: #{info["user"]["name"]}\n"
 						catch error
 #							do nothing, break nothing
 					string += """
-
 					Status: #{issue["state"]}
 					Opened: #{issue["created_at"]}
 					Last Updated: #{issue["updated_at"]}
 					"""
 					if issue["state"] is "closed"
 						string += """
-
-						Closed: #{issue["closed_at"]}
+						\nClosed: #{issue["closed_at"]}
 						Closed By: #{issue["closed_by"]["login"]}
 						""" # @TODO: Check to see if it was us that closed it
 					deferred.resolve string
@@ -123,16 +121,15 @@ module.exports = class Utils
 				else if user.name isnt owner
 					deferred.resolve "Sorry, only the original owner of this task can close it. If this is an error please contact #{process.env.HUBOT_ISSUE_TRACKER_CONTACT}"
 				else
-					q.all [
+					promises = q.allSettled [
 						Utils.addCommentToIssue user, id
 						Utils.closeIssue id
 					]
-					.then () ->
+					promises.then () ->
 						deferred.resolve "Task #{id} closed!"
 					.catch (error) ->
 						deferred.reject error
 					.done()
-				return
 			.catch (error) ->
 				deferred.reject error
 			.done()
@@ -181,9 +178,9 @@ module.exports = class Utils
 				(error, response) ->
 					try
 						if not error and response.statusCode == 201
-							deferred.resolve true
+							deferred.resolve()
 						else
-						deferred.reject if error then error else body
+							deferred.reject if error then error else body
 					catch ex
 						deferred.reject ex
 		catch ex
@@ -201,10 +198,9 @@ module.exports = class Utils
 			,
 				(error, response) ->
 					if not error and response.statusCode == 200
-						deferred.resolve true
+						deferred.resolve()
 					else
 						deferred.reject if error then error else body
-					return
 		catch ex
 			deferred.reject ex
 		return deferred.promise
