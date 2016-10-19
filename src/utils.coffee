@@ -12,6 +12,8 @@ headers =
 	"Content-Type": "application/json"
 	"Authorization": "token #{process.env.HUBOT_ISSUE_TRACKER_GITHUB_TOKEN}"
 
+TASK_LIMIT = 5
+
 module.exports = class Utils
 
 	@addTask: (user, task) ->
@@ -47,7 +49,7 @@ module.exports = class Utils
 			deferred.reject ex
 		return deferred.promise
 
-	@listTasks: ->
+	@listTasks: (full) ->
 		deferred = q.defer()
 		promises = q.all [
 			Utils.getOpenTasks()
@@ -55,11 +57,13 @@ module.exports = class Utils
 		]
 		promises.then (data) ->
 			string = "Current tasks:\n\n"
-			for issue in data[0]
+			for issue in (if full then data[0] else data[0].slice(0, TASK_LIMIT))
 				string += " - ##{issue.number} - #{issue.title}\n"
 			string += "\nRecently Closed Tasks:\n\n"
-			for issue in data[1]
+			for issue in (if full then data[1] else data[1].slice(0, TASK_LIMIT))
 				string += " - ##{issue.number} - #{issue.title}\n"
+			if not full and (data[0].length >= TASK_LIMIT or data[1].length >= TASK_LIMIT)
+				string += "\nList is truncated, use 'list all tasks' to see complete list"
 			deferred.resolve string
 		.catch (ex) ->
 			deferred.reject ex

@@ -44,7 +44,15 @@ module.exports = (robot) ->
 		.done()
 
 	robot.respond /list tasks/, (msg) ->
-		Utils.listTasks()
+		Utils.listTasks(false)
+		.then (data) ->
+			msg.reply data
+		.catch (err) ->
+			robot.emit 'error', err, msg
+		.done()
+
+	robot.respond /list all tasks/, (msg) ->
+		Utils.listTasks(true)
 		.then (data) ->
 			msg.reply data
 		.catch (err) ->
