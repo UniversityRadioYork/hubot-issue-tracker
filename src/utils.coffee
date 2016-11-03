@@ -19,8 +19,6 @@ module.exports = class Utils
 	@addTask: (user, task) ->
 		deferred = q.defer()
 		try
-			if user["slack"]?
-				delete  user["slack"]
 			request.post
 				"url": base_url
 				"headers": headers
@@ -31,7 +29,9 @@ module.exports = class Utils
 					###### Please do not alter the description of this issue.
 					###### Below is the user that submitted the issue and the original message.
 					#{tomlify
-						"user": user
+						"user":
+							"name": user["name"]
+							"real_name": user["real_name"]
 						"message": task
 					, null, 2}
 					"""
@@ -213,7 +213,9 @@ module.exports = class Utils
 					###### Please do not change the contents of this comment.
 					###### Below is the user that closed this issue.
 					#{tomlify
-						"user": user
+						"user":
+							"name": user["name"]
+							"real_name": user["real_name"]
 					, null, 2}
 					"""
 			,
