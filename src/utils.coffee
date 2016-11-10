@@ -62,7 +62,7 @@ module.exports = class Utils
 			string += "\nRecently Closed Tasks:\n\n"
 			for issue in (if full then data[1] else data[1].slice(0, TASK_LIMIT))
 				string += " - ##{issue.number} - #{issue.title}\n"
-			if not full and (data[0].length >= TASK_LIMIT or data[1].length >= TASK_LIMIT)
+			if not full and (data[0].length > TASK_LIMIT or data[1].length > TASK_LIMIT)
 				string += "\nList is truncated, use 'list all tasks' to see complete list"
 			deferred.resolve string
 		.catch (ex) ->
@@ -75,7 +75,7 @@ module.exports = class Utils
 		try
 			stamp = moment().subtract(7, 'days').toISOString()
 			request.get
-				"url": "#{base_url}?state=closed&since=#{encodeURIComponent stamp}labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL}"
+				"url": "#{base_url}?state=closed&since=#{encodeURIComponent stamp}&labels=#{encodeURIComponent process.env.HUBOT_ISSUE_TRACKER_GITHUB_LABEL}"
 				"headers": headers
 			,
 				(error, response, body) ->
